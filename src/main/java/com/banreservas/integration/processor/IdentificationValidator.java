@@ -10,9 +10,7 @@ import java.util.regex.Pattern;
 
 @ApplicationScoped
 public class IdentificationValidator implements Processor {
-    private static final Pattern CEDULA_PATTERN = Pattern.compile("^\\d{11}$");
-    private static final String NAMESPACE = "http://tempuri.org/";
-    private static final int BAD_REQUEST_STATUS = 400;
+    private static final Pattern ALPHANUMERIC_PATTERN = Pattern.compile("^[A-Za-z0-9]+$");
 
     @Override
     public void process(Exchange exchange) throws Exception {
@@ -26,27 +24,33 @@ public class IdentificationValidator implements Processor {
             validateIdentification(identificacion, tipoIdentificacion);
 
             exchange.setProperty("validationPassed", true);
-        } catch (IllegalArgumentException e) {
-            throw SoapFaultBuilder.createValidationFault(
-                    e.getMessage(),
-                    "VAL-400",
-                    NAMESPACE,
-                    BAD_REQUEST_STATUS
-            );
+        } catch (Exception e) {
+            // Propagar la excepción original para que sea manejada por el ErrorHandler
+            throw new IllegalArgumentException(e.getMessage());
         }
     }
 
+
     private void validateIdentification(String identificacion, String tipoIdentificacion) {
-        if (identificacion == null || tipoIdentificacion == null) {
-            throw new IllegalArgumentException("Identificación y tipo de identificación son requeridos");
+        if (identificacion == null || identificacion.trim().isEmpty() ||
+                tipoIdentificacion == null || tipoIdentificacion.trim().isEmpty()) {
+            throw new IllegalArgumentException("El tipo de identificación y el número es requerido para continuar la operación");
         }
 
-        if ("Cedula".equals(tipoIdentificacion)) {
-            if (!CEDULA_PATTERN.matcher(identificacion).matches()) {
-                throw new IllegalArgumentException("Formato de cédula inválido");
-            }
-        } else {
-            throw new IllegalArgumentException("Tipo de identificación no soportado: " + tipoIdentificacion);
+        identificacion = identificacion.trim();
+
+        if (!ALPHANUMERIC_PATTERN.matcher(identificacion).matches()) {
+            throw new IllegalArgumentException("La identificación solo puede contener caracteres alfanuméricos");
+        }
+
+        switch (tipoIdentificacion) {
+            case "Cedula":
+            case "Pasaporte":
+            case "RNC":
+            case "GrupoEconomico":
+                break;
+            default:
+                throw new IllegalArgumentException("Tipo de identificación no válido: " + tipoIdentificacion);
         }
     }
 }

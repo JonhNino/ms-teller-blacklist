@@ -12,7 +12,6 @@ import org.apache.camel.Exchange;
 import org.apache.camel.LoggingLevel;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.cxf.jaxws.CxfEndpoint;
-import org.apache.cxf.interceptor.Fault;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
 
@@ -86,20 +85,20 @@ public class BlackListVerificationRoute extends RouteBuilder {
         from(Constants.DIRECT_CALL_RESTRINGIDO)
                 .routeId("RestringidoRoute")
                 .doTry()
-                    .to(Constants.DIRECT_PREPARE_HTTP_REQUEST)
-                    .setHeader("ServiceName", constant("restringido"))
-                    .to("hptt:" + restringidoUrl + "?bridgeEndpoint=true")
-                    .to(Constants.DIRECT_PROCESS_HTTP_RESPONSE)
+                .to(Constants.DIRECT_PREPARE_HTTP_REQUEST)
+                .setHeader("ServiceName", constant("restringido"))
+                .to("http:" + restringidoUrl + "?bridgeEndpoint=true")
+                .to(Constants.DIRECT_PROCESS_HTTP_RESPONSE)
                 .doCatch(Exception.class)
-                    .log(LoggingLevel.ERROR, "Error en llamada a restringido: ${exception.message}")
-                    .process(exchange -> {
-                        throw SoapFaultBuilder.createValidationFault(
-                                "Error en el servicio de restringido",
-                                "RESTRINGIDO_ERROR",
-                                "http://banreservas.com/integration/faults",
-                                500
-                        );
-                    });
+                .log(LoggingLevel.ERROR, "Error en llamada a restringido: ${exception.message}")
+                .process(exchange -> {
+                    throw SoapFaultBuilder.createValidationFault(
+                            "Error en el servicio de restringido",
+                            "RESTRINGIDO_ERROR",
+                            "http://banreservas.com/integration/faults",
+                            500
+                    );
+                });
 
         // Ruta para preparar request HTTP
         from(Constants.DIRECT_PREPARE_HTTP_REQUEST)
@@ -115,4 +114,6 @@ public class BlackListVerificationRoute extends RouteBuilder {
                 .unmarshal().json()
                 .log(LoggingLevel.INFO, "Respuesta de ${header.ServiceName} recibida: ${body}");
     }
+
+
 }
