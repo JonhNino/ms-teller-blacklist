@@ -1,3 +1,4 @@
+/*
 package com.banreservas;
 
 import jakarta.ws.rs.GET;
@@ -14,3 +15,4 @@ public class GreetingResource {
         return "Hello from Quarkus REST";
     }
 }
+*/
