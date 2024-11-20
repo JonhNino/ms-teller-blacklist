@@ -1,6 +1,6 @@
 package com.banreservas.integration.config;
 
-import com.banreservas.integration.handler.SoapMessageHandler;
+import com.banreservas.integration.handler.java.SoapMessageHandler;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Named;

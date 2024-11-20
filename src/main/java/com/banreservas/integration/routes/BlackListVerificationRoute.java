@@ -2,6 +2,7 @@ package com.banreservas.integration.routes;
 
 import com.banreservas.integration.constants.Constants;
 import com.banreservas.integration.fault.SoapFaultBuilder;
+import com.banreservas.integration.handler.routes.ErrorHandlerConfig;
 import com.banreservas.integration.processor.FinalResponseProcessor;
 import com.banreservas.integration.processor.IdentificationValidator;
 import com.banreservas.integration.processor.ResponseAggregationStrategy;
@@ -30,7 +31,7 @@ public class BlackListVerificationRoute extends RouteBuilder {
     @Override
     public void configure() throws Exception {
         // Error handler global
-        configureErrorHandler();
+        ErrorHandlerConfig.configureErrorHandler(this);
 
         // Ruta principal SOAP
         from(cxfEndpoint)
@@ -85,20 +86,20 @@ public class BlackListVerificationRoute extends RouteBuilder {
         from(Constants.DIRECT_CALL_RESTRINGIDO)
                 .routeId("RestringidoRoute")
                 .doTry()
-                .to(Constants.DIRECT_PREPARE_HTTP_REQUEST)
-                .setHeader("ServiceName", constant("restringido"))
-                .to("http:" + restringidoUrl + "?bridgeEndpoint=true")
-                .to(Constants.DIRECT_PROCESS_HTTP_RESPONSE)
+                    .to(Constants.DIRECT_PREPARE_HTTP_REQUEST)
+                    .setHeader("ServiceName", constant("restringido"))
+                    .to("hptt:" + restringidoUrl + "?bridgeEndpoint=true")
+                    .to(Constants.DIRECT_PROCESS_HTTP_RESPONSE)
                 .doCatch(Exception.class)
-                .log(LoggingLevel.ERROR, "Error en llamada a restringido: ${exception.message}")
-                .process(exchange -> {
-                    throw SoapFaultBuilder.createValidationFault(
-                            "Error en el servicio de restringido",
-                            "RESTRINGIDO_ERROR",
-                            "http://banreservas.com/integration/faults",
-                            500
-                    );
-                });
+                    .log(LoggingLevel.ERROR, "Error en llamada a restringido: ${exception.message}")
+                    .process(exchange -> {
+                        throw SoapFaultBuilder.createValidationFault(
+                                "Error en el servicio de restringido",
+                                "RESTRINGIDO_ERROR",
+                                "http://banreservas.com/integration/faults",
+                                500
+                        );
+                    });
 
         // Ruta para preparar request HTTP
         from(Constants.DIRECT_PREPARE_HTTP_REQUEST)
@@ -112,26 +113,6 @@ public class BlackListVerificationRoute extends RouteBuilder {
         from(Constants.DIRECT_PROCESS_HTTP_RESPONSE)
                 .routeId("HttpResponseProcessingRoute")
                 .unmarshal().json()
-                .log(LoggingLevel.INFO, "Respuesta de ${header.ServiceName} recibida: ${body}");}
-
-    private void configureErrorHandler() {
-        errorHandler(defaultErrorHandler()
-                .maximumRedeliveries(2)
-                .redeliveryDelay(1000)
-                .logRetryAttempted(true));
-
-        onException(Exception.class)
-                .handled(true)
-                .logHandled(true)
-                .log(LoggingLevel.ERROR, "Error global: ${exception.message}")
-                .process(exchange -> {
-                    Exception cause = exchange.getProperty(Exchange.EXCEPTION_CAUGHT, Exception.class);
-                    throw SoapFaultBuilder.createValidationFault(
-                            "Error en el procesamiento de la solicitud: " + cause.getMessage(),
-                            "INTERNAL_ERROR",
-                            "http://banreservas.com/integration/faults",
-                            500
-                    );
-                });
+                .log(LoggingLevel.INFO, "Respuesta de ${header.ServiceName} recibida: ${body}");
     }
 }

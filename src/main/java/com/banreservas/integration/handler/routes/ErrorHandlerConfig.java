@@ -1,18 +1,19 @@
-/*
 package com.banreservas.integration.handler.routes;
 
 import com.banreservas.integration.fault.SoapFaultBuilder;
 import org.apache.camel.Exchange;
 import org.apache.camel.LoggingLevel;
+import org.apache.camel.builder.RouteBuilder;
 
-public class configureErrorHandler() {
-    private void configureErrorHandler() {
-        errorHandler(defaultErrorHandler()
+public class ErrorHandlerConfig {
+
+    public static void configureErrorHandler(RouteBuilder routeBuilder) {
+        routeBuilder.errorHandler(routeBuilder.defaultErrorHandler()
                 .maximumRedeliveries(2)
                 .redeliveryDelay(1000)
                 .logRetryAttempted(true));
 
-        onException(Exception.class)
+        routeBuilder.onException(Exception.class)
                 .handled(true)
                 .logHandled(true)
                 .log(LoggingLevel.ERROR, "Error global: ${exception.message}")
@@ -27,4 +28,3 @@ public class configureErrorHandler() {
                 });
     }
 }
-*/

@@ -1,4 +1,4 @@
-package com.banreservas.integration.handler;
+package com.banreservas.integration.handler.java;
 
 
 import com.banreservas.integration.fault.SoapFaultBuilder;
