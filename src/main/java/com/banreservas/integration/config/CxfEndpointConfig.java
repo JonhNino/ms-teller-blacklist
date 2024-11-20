@@ -39,10 +39,10 @@ public class CxfEndpointConfig {
 
     private void configureEndpointProperties(CxfEndpoint cxfEndpoint) {
         Map<String, Object> properties = new HashMap<>();
-        properties.put("schema-validation-enabled", true);
+        properties.put("schema-validation-enabled", false);
         properties.put("exceptionMessageCauseEnabled", true);
         properties.put("allowEmptyInput", false);
-        properties.put("validationEnabled", true);
+     //   properties.put("validationEnabled", true);
         cxfEndpoint.setProperties(properties);
     }
 

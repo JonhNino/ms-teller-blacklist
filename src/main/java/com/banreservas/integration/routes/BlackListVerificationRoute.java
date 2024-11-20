@@ -16,12 +16,13 @@ public class BlackListVerificationRoute extends RouteBuilder {
 
     @Override
     public void configure() throws Exception {
-        // Configuración de la ruta principal
         from(cxfEndpoint)
                 .routeId("SoapServiceRoute")
                 .log("Procesando solicitud SOAP")
                 .unmarshal().jacksonXml()
                 .log("Solicitud unmarshalled correctamente: ${body}")
+                .process(new com.banreservas.integration.routes.IdentificationValidator())
+                .log("Validación completada exitosamente")
                 .end();
     }
 }
