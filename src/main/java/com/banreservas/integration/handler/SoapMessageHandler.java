@@ -1,6 +1,6 @@
 package com.banreservas.integration.handler;
 
-import com.banreservas.integration.exception.SoapValidationException;
+
 import com.banreservas.integration.fault.SoapFaultBuilder;
 import org.apache.cxf.interceptor.Fault;
 import org.apache.cxf.message.Message;

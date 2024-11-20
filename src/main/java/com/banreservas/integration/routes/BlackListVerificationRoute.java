@@ -1,5 +1,6 @@
 package com.banreservas.integration.routes;
 
+import com.banreservas.integration.processor.IdentificationValidator;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.apache.camel.builder.RouteBuilder;
@@ -21,8 +22,10 @@ public class BlackListVerificationRoute extends RouteBuilder {
                 .log("Procesando solicitud SOAP")
                 .unmarshal().jacksonXml()
                 .log("Solicitud unmarshalled correctamente: ${body}")
-                .process(new com.banreservas.integration.routes.IdentificationValidator())
-                .log("Validación completada exitosamente")
+                .process(new IdentificationValidator())
+                .log("Validación completada exitosamente ${body}")
+                .process(new com.banreservas.integration.routes.ResponseTransformer())
+                .log("Respuesta transformada: ${body}")
                 .end();
     }
 }
